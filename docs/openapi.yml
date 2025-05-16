@@ -235,28 +235,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/CardResponseDto'
-    patch:
-      summary: Обновить карту частично
-      parameters:
-        - name: userId
-          in: path
-          required: true
-          schema:
-            type: integer
-        - name: cardId
-          in: path
-          required: true
-          schema:
-            type: integer
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/CardRequestDto'
-      responses:
-        '200':
-          description: Карта обновлена
 
   /cards/user/{userId}/card/{cardId}/block:
     post:

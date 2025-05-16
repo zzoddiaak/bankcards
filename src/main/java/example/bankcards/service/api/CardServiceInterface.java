@@ -28,7 +28,5 @@ public interface CardServiceInterface {
     List<CardResponseDto> getAllCards();
     void requestCardBlock(Long userId, Long cardId);
     List<CardResponseDto> findCardsPendingBlock();
-    void updateCard(Long userId, Long cardId, CardRequestDto dto);
-
 }
 

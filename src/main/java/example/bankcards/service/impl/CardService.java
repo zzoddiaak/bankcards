@@ -63,33 +63,6 @@ public class CardService implements CardServiceInterface {
     }
 
     @Override
-    public void updateCard(Long userId, Long cardId, CardRequestDto dto) {
-        Card card = cardRepository.findByIdAndOwnerId(cardId, userId)
-                .orElseThrow(() -> new CardNotFoundOrAccessDenied(cardId));
-
-        if (dto.getCardNumber() != null) {
-            if (!isValidCardNumberFormat(dto.getCardNumber())) {
-                throw new InvalidCardNumberException(dto.getCardNumber());
-            }
-            if (!dto.getCardNumber().equals(card.getCardNumber()) &&
-                    cardRepository.existsByCardNumber(dto.getCardNumber())) {
-                throw new CardAlreadyExistsException(dto.getCardNumber());
-            }
-            card.setCardNumber(dto.getCardNumber());
-        }
-
-        if (dto.getExpirationDate() != null) {
-            card.setExpirationDate(dto.getExpirationDate());
-        }
-
-        if (dto.getBalance() != null) {
-            card.setBalance(dto.getBalance());
-        }
-
-        cardRepository.save(card);
-    }
-
-    @Override
     public Page<CardResponseDto> getUserCards(
             Long userId,
             CardStatus status,

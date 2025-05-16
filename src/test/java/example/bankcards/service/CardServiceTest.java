@@ -74,30 +74,6 @@ class CardServiceTest {
     }
 
     @Test
-    void updateCard_success() {
-        Long userId = 1L;
-        Long cardId = 2L;
-        CardRequestDto dto = CardRequestDto.builder()
-                .cardNumber("1234567812345678")
-                .expirationDate(LocalDate.now().plusYears(1))
-                .balance(new BigDecimal("150.00"))
-                .build();
-
-        Card card = new Card();
-        card.setCardNumber("8765432187654321");
-
-        when(cardRepository.findByIdAndOwnerId(cardId, userId)).thenReturn(Optional.of(card));
-        when(cardRepository.existsByCardNumber(dto.getCardNumber())).thenReturn(false);
-
-        cardService.updateCard(userId, cardId, dto);
-
-        assertEquals(dto.getCardNumber(), card.getCardNumber());
-        assertEquals(dto.getExpirationDate(), card.getExpirationDate());
-        assertEquals(dto.getBalance(), card.getBalance());
-        verify(cardRepository).save(card);
-    }
-
-    @Test
     void getCardDetails_autoExpiresIfExpired() {
         Long userId = 1L;
         Long cardId = 10L;

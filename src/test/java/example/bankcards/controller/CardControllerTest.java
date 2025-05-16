@@ -111,21 +111,6 @@ class CardControllerTest {
                 .andExpect(jsonPath("$.content[0].id").value(responseDto.getId()));
     }
 
-    @Test
-    @WithMockUser(roles = "ADMIN")
-    void testUpdateCard() throws Exception {
-        Long userId = 1L;
-        Long cardId = 2L;
-        CardRequestDto requestDto = createSampleRequestDto();
-
-        Mockito.doNothing().when(cardService).updateCard(eq(userId), eq(cardId), any(CardRequestDto.class));
-
-        mockMvc.perform(patch("/api/cards/user/{userId}/card/{cardId}", userId, cardId)
-                        .with(csrf())
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(requestDto)))
-                .andExpect(status().isOk());
-    }
 
     @Test
     @WithMockUser(roles = {"ADMIN", "USER"})

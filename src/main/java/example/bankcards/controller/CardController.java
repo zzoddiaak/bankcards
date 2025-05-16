@@ -52,18 +52,6 @@ public class CardController {
         return cardService.getUserCards(userId, status, expirationBefore, minBalance, maxBalance, pageable);
     }
 
-    @Operation(summary = "Частичное обновление карты пользователя")
-    @PatchMapping("/user/{userId}/card/{cardId}")
-    @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<Void> updateCard(
-            @PathVariable Long userId,
-            @PathVariable Long cardId,
-            @RequestBody CardRequestDto dto
-    ) {
-        cardService.updateCard(userId, cardId, dto);
-        return ResponseEntity.ok().build();
-    }
-
 
     @Operation(summary = "Получить детали карты пользователя (USER)")
     @GetMapping("/user/{userId}/card/{cardId}")
