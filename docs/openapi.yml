@@ -1,0 +1,415 @@
+openapi: 3.1.0
+info:
+  title: Bank Cards API
+  version: 1.0.0
+  description: |
+    Полная спецификация API для системы управления банковскими картами, пользователями и транзакциями.
+    Все эндпоинты защищены JWT-аутентификацией. Доступ к действиям ограничивается ролями `USER` и `ADMIN`.
+
+servers:
+  - url: http://localhost:8080/api
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+  schemas:
+    CardStatus:
+      type: string
+      enum: [ACTIVE, BLOCKED, EXPIRED, PENDING_BLOCK]
+
+    CardRequestDto:
+      type: object
+      properties:
+        cardNumber:
+          type: string
+        expirationDate:
+          type: string
+          format: date
+        balance:
+          type: number
+          format: double
+
+    CardResponseDto:
+      type: object
+      properties:
+        id:
+          type: integer
+        maskedCardNumber:
+          type: string
+        expirationDate:
+          type: string
+          format: date
+        status:
+          $ref: '#/components/schemas/CardStatus'
+        balance:
+          type: number
+        ownerId:
+          type: integer
+
+    AuthResponseDto:
+      type: object
+      properties:
+        token:
+          type: string
+
+    RegisterRequestDto:
+      type: object
+      properties:
+        email:
+          type: string
+        password:
+          type: string
+
+    LoginRequestDto:
+      type: object
+      properties:
+        email:
+          type: string
+        password:
+          type: string
+
+    CardTransferRequestDto:
+      type: object
+      properties:
+        fromCardId:
+          type: integer
+        toCardId:
+          type: integer
+        amount:
+          type: number
+
+    CardTransactionDto:
+      type: object
+      properties:
+        id:
+          type: integer
+        cardId:
+          type: integer
+        amount:
+          type: number
+        type:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+
+    UserRequestDto:
+      type: object
+      properties:
+        name:
+          type: string
+        email:
+          type: string
+        password:
+          type: string
+
+    UserResponseDto:
+      type: object
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        email:
+          type: string
+
+security:
+  - bearerAuth: []
+
+paths:
+  /auth/register:
+    post:
+      summary: Регистрация пользователя
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RegisterRequestDto'
+      responses:
+        '200':
+          description: Успешная регистрация
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthResponseDto'
+
+  /auth/login:
+    post:
+      summary: Аутентификация пользователя
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LoginRequestDto'
+      responses:
+        '200':
+          description: Успешный вход
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthResponseDto'
+
+  /cards/{ownerId}:
+    post:
+      summary: Создать карту
+      parameters:
+        - name: ownerId
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CardRequestDto'
+      responses:
+        '201':
+          description: Карта создана
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CardResponseDto'
+
+  /cards/users/{userId}/cards:
+    get:
+      summary: Получить карты пользователя
+      parameters:
+        - name: userId
+          in: path
+          required: true
+          schema:
+            type: integer
+        - name: status
+          in: query
+          schema:
+            $ref: '#/components/schemas/CardStatus'
+        - name: expirationBefore
+          in: query
+          schema:
+            type: string
+            format: date
+        - name: minBalance
+          in: query
+          schema:
+            type: number
+        - name: maxBalance
+          in: query
+          schema:
+            type: number
+      responses:
+        '200':
+          description: Список карт
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/CardResponseDto'
+
+  /cards/user/{userId}/card/{cardId}:
+    get:
+      summary: Получить детали карты
+      parameters:
+        - name: userId
+          in: path
+          required: true
+          schema:
+            type: integer
+        - name: cardId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Детали карты
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CardResponseDto'
+    patch:
+      summary: Обновить карту частично
+      parameters:
+        - name: userId
+          in: path
+          required: true
+          schema:
+            type: integer
+        - name: cardId
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CardRequestDto'
+      responses:
+        '200':
+          description: Карта обновлена
+
+  /cards/user/{userId}/card/{cardId}/block:
+    post:
+      summary: Заблокировать карту
+      parameters:
+        - name: userId
+          in: path
+        - name: cardId
+          in: path
+      responses:
+        '200':
+          description: Карта заблокирована
+
+  /cards/request/user/{userId}/card/{cardId}/block:
+    post:
+      summary: Запрос на блокировку карты
+      parameters:
+        - name: userId
+          in: path
+        - name: cardId
+          in: path
+      responses:
+        '200':
+          description: Запрос принят
+
+  /cards/admin/{cardId}/status:
+    patch:
+      summary: Обновить статус карты
+      parameters:
+        - name: cardId
+          in: path
+        - name: status
+          in: query
+          schema:
+            $ref: '#/components/schemas/CardStatus'
+      responses:
+        '200':
+          description: Статус обновлён
+
+  /cards/all:
+    get:
+      summary: Получить все карты
+      responses:
+        '200':
+          description: Список всех карт
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/CardResponseDto'
+
+  /cards/admin/cards/pending-block:
+    get:
+      summary: Карты в ожидании блокировки
+      responses:
+        '200':
+          description: Список карт
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/CardResponseDto'
+
+  /transactions/transfer/{userId}:
+    post:
+      summary: Перевод между своими картами
+      parameters:
+        - name: userId
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CardTransferRequestDto'
+      responses:
+        '200':
+          description: Успешный перевод
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CardTransactionDto'
+
+  /transactions/history/{userId}/card/{cardId}:
+    get:
+      summary: История транзакций
+      parameters:
+        - name: userId
+          in: path
+        - name: cardId
+          in: path
+      responses:
+        '200':
+          description: История
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/CardTransactionDto'
+
+  /users:
+    get:
+      summary: Получить всех пользователей
+      responses:
+        '200':
+          description: Список пользователей
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/UserResponseDto'
+
+  /users/{id}:
+    get:
+      summary: Получить пользователя по ID
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Данные пользователя
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserResponseDto'
+    put:
+      summary: Обновить пользователя
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserRequestDto'
+      responses:
+        '200':
+          description: Обновлённые данные
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserResponseDto'
+    delete:
+      summary: Удалить пользователя
+      responses:
+        '204':
+          description: Удалён
+

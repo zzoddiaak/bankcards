@@ -1,0 +1,153 @@
+databaseChangeLog:
+
+
+  - changeSet:
+      id: 01
+      author: Daniil
+      changes:
+        - createTable:
+            tableName: users
+            columns:
+              - column:
+                  name: id
+                  type: BIGINT
+                  autoIncrement: true
+                  constraints:
+                    primaryKey: true
+              - column:
+                  name: username
+                  type: VARCHAR(255)
+                  constraints:
+                    nullable: false
+                    unique: true
+              - column:
+                  name: password
+                  type: VARCHAR(255)
+
+        - createTable:
+            tableName: roles
+            columns:
+              - column:
+                  name: id
+                  type: BIGINT
+                  autoIncrement: true
+                  constraints:
+                    primaryKey: true
+              - column:
+                  name: name
+                  type: VARCHAR(255)
+
+        - createTable:
+            tableName: user_roles
+            columns:
+              - column:
+                  name: user_id
+                  type: BIGINT
+              - column:
+                  name: role_id
+                  type: BIGINT
+
+        - addForeignKeyConstraint:
+            constraintName: fk_user_roles_user_id
+            baseTableName: user_roles
+            baseColumnNames: user_id
+            referencedTableName: users
+            referencedColumnNames: id
+
+        - addForeignKeyConstraint:
+            constraintName: fk_user_roles_role_id
+            baseTableName: user_roles
+            baseColumnNames: role_id
+            referencedTableName: roles
+            referencedColumnNames: id
+
+        - createTable:
+            tableName: cards
+            columns:
+              - column:
+                  name: id
+                  type: BIGINT
+                  autoIncrement: true
+                  constraints:
+                    primaryKey: true
+              - column:
+                  name: card_number
+                  type: VARCHAR(255)
+                  constraints:
+                    nullable: false
+                    unique: true
+              - column:
+                  name: expiration_date
+                  type: DATE
+              - column:
+                  name: status
+                  type: VARCHAR(50)
+              - column:
+                  name: balance
+                  type: DECIMAL(19,2)
+              - column:
+                  name: owner_id
+                  type: BIGINT
+
+        - addForeignKeyConstraint:
+            constraintName: fk_cards_owner_id
+            baseTableName: cards
+            baseColumnNames: owner_id
+            referencedTableName: users
+            referencedColumnNames: id
+
+        - createTable:
+            tableName: card_transactions
+            columns:
+              - column:
+                  name: id
+                  type: BIGINT
+                  autoIncrement: true
+                  constraints:
+                    primaryKey: true
+              - column:
+                  name: amount
+                  type: DECIMAL(19,2)
+              - column:
+                  name: timestamp
+                  type: DATETIME
+              - column:
+                  name: from_card_id
+                  type: BIGINT
+              - column:
+                  name: to_card_id
+                  type: BIGINT
+              - column:
+                  name: description
+                  type: VARCHAR(255)
+
+        - addForeignKeyConstraint:
+            constraintName: fk_card_transactions_from_card_id
+            baseTableName: card_transactions
+            baseColumnNames: from_card_id
+            referencedTableName: cards
+            referencedColumnNames: id
+
+        - addForeignKeyConstraint:
+            constraintName: fk_card_transactions_to_card_id
+            baseTableName: card_transactions
+            baseColumnNames: to_card_id
+            referencedTableName: cards
+            referencedColumnNames: id
+
+  - changeSet:
+      id: 02
+      author: Daniil
+      changes:
+        - insert:
+            tableName: roles
+            columns:
+              - column:
+                  name: name
+                  value: "USER"
+        - insert:
+            tableName: roles
+            columns:
+              - column:
+                  name: name
+                  value: "ADMIN"

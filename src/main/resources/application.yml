@@ -1,0 +1,44 @@
+security:
+  encryption:
+    aes-key: "my32bytekey123456789012345678901"
+
+spring:
+  springdoc:
+    api-docs:
+      path: /v3/api-docs
+    swagger-ui:
+      path: /swagger-ui.html
+
+  datasource:
+    url: jdbc:postgresql://postgres:5432/cards
+    username: postgres
+    password: postgres
+    driver-class-name: org.postgresql.Driver
+
+  jpa:
+    hibernate:
+      ddl-auto: none
+    show-sql: true
+    properties:
+      hibernate:
+        format_sql: true
+
+  liquibase:
+    enabled: true
+    change-log: classpath:db/migration/master.yml
+
+  security:
+    jwt:
+      key:
+        secret: sghmgh8m6fhmyjY8YYYKK0YGgugg88fg8fggggggggggggg
+
+  server:
+    port: 8080
+
+  logging:
+    level:
+      org.springframework.security: TRACE
+      root: DEBUG
+      org.springframework.web: DEBUG
+      org.hibernate.SQL: DEBUG
+      org.hibernate.type.descriptor.sql: TRACE
